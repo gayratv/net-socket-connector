@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "Node16",
+    "rootDir": "./src",
+    "outDir": "./build",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "sourceMap": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "importHelpers": true,
+    "allowUnreachableCode": false, // Сообщить об ошибке в случае обнаружения кода, который никогда не будет выполнен?
+    "isolatedModules": true, // для esbuild
+    "esModuleInterop": true ,
+    "typeRoots": ["./node_modules/@types", "./types","types"],
+    "baseUrl": "./src",
+    "composite": true,
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts"
+  ],
+
+  "ts-node": {
+    "esm": true,
+    "transpileOnly": true,
+    "files": true,
+    "experimentalResolver": true,
+    "experimentalSpecifierResolution": "node"
+
+  }
+}
