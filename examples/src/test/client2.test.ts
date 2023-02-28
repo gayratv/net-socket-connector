@@ -1,4 +1,4 @@
-import { SocketMessaging, MessageToServer, delay } from 'net-manager';
+import { SocketMessaging, MessageToServer, delay } from 'resource-manager-socket';
 
 const s = new SocketMessaging('s1');
 await s.connect();

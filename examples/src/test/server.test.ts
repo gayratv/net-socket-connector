@@ -1,5 +1,5 @@
-import { ServerSocket, WorkerForServer, delay } from 'net-manager';
-import type { Executor, GetNextClientJob, JobWorker } from 'net-manager';
+import { ServerSocket, WorkerForServer, delay } from 'resource-manager-socket';
+import type { Executor, GetNextClientJob, JobWorker } from 'resource-manager-socket';
 
 // для тестирования пакета
 let counter = 0;
