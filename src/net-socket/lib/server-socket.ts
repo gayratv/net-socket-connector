@@ -15,15 +15,12 @@ import {
 } from '../types/net-socket-types.js';
 import { AddressInfo, Socket, Server, createServer } from 'node:net';
 import { splitMessages } from '../helpers/socket-helpers.js';
-import chalk from 'chalk';
-
+import { ILogger } from 'log/logger.interface.js';
 function socketState(socket: Socket) {
   return `socketstate: ${socket.remoteAddress}:${socket.remotePort} -- ${socket.readyState}==${socket.remoteFamily}`;
 }
 
 export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitter {
-  private name: string;
-
   //  ключ ${socket.remoteAddress}:${socket.remotePort}
   // по ключю находится объект : socket
   private clientsSocket: Record<string, Socket> = {};
@@ -35,9 +32,8 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
   private server: Server;
 
   private msgBuffer = ''; // остаток буфера
-  constructor(name: string) {
+  constructor(public name: string, public log: ILogger) {
     super();
-    this.name = name;
   }
 
   async createServer() {
@@ -99,22 +95,25 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
 
       socket.on('end', () => {
         this.deleteClientRequestAfterSocketClose(socket);
-        console.log(chalk.yellow.bold('Client disconnected '), socketState(socket));
+        this.log.info(this.log.sw('Client disconnected ', ['yellow', 'bold']), socketState(socket));
       });
 
       socket.on('error', (err: ErrorNet) => {
         if (err.code === 'ECONNRESET') {
-          console.log(chalk.yellow.bold('ECONNRESET Client connection reset '), socketState(socket));
+          this.log.info(this.log.sw('ECONNRESET Client connection reset ', ['yellow', 'bold']), socketState(socket));
         } else {
-          console.log(chalk.red(`Socket unknown error: ${err}`));
+          this.log.info(this.log.sw(`Socket unknown error: ${err}`, 'red'));
         }
         this.deleteClientRequestAfterSocketClose(socket);
       });
     });
 
     this.server.on('connection', (socket) => {
-      console.log(
-        chalk.bgGray(`${this.name} Client connection details - ${socket.remoteAddress}:${socket.remotePort}`),
+      this.log.info(
+        this.log.sw(
+          `${this.name} Client connection details - ${socket.remoteAddress}:${socket.remotePort}`,
+          'bgBlackBright',
+        ),
       );
       // socket.write(`${this.name}  SERVER: Hello! Connection successfully made.`);
     });
@@ -134,7 +133,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
 
     // worker успешно выполнил задачу
     super.on(workerJobDone, (args: EventJobDoneArgs<TresultJob>) => {
-      console.timeLog(
+      this.log.info(
         'SRV1',
         workerJobDone,
         args.demand.queItem.key,

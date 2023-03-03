@@ -97,4 +97,3 @@ export const MESSAGE_SEPARATOR = '🦀';
 
 // максимальное время ожидания клиентом ответа от сервера
 export const CLIENT_WAIT_FOR_SERVER_ANSWER = 10_000;
-export const CLIENT_LOG_TIME_LABEL = 'CLI_T';

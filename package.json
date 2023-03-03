@@ -16,10 +16,14 @@
     "build": "rimraf dist && rimraf tsconfig.tsbuildinfo && node ./scripts/esbuild.js && tsc",
     "type-check": "tsc -noEmit",
     "pub": "npm publish --public",
-    "server": "ts-node ./src/localtest/server.test.ts",
+    "server": "ts-node -r tsconfig-paths/register ./src/localtest/server.test.ts",
     "client": "ts-node ./src/localtest/client.test.ts"
   },
-  "keywords": ["socket","resource","microservice"],
+  "keywords": [
+    "socket",
+    "resource",
+    "microservice"
+  ],
   "author": "Gayrat Vlasov",
   "repository": {
     "type": "git",
@@ -30,6 +34,9 @@
   },
   "homepage": "https://github.com/gayratv/resource-manager/",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@types/node": "^18.11.10",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
@@ -41,10 +48,16 @@
     "prettier": "^2.8.0",
     "rimraf": "^3.0.2",
     "ts-node": "^10.9.1",
+    "tsconfig-paths": "^3.14.2",
     "typescript": "^4.9.5"
   },
   "peerDependencies": {
-    "chalk": "^5.2.0",
     "dotenv": "^16.0.3"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.7",
+    "inversify": "^6.0.1",
+    "reflect-metadata": "^0.1.13",
+    "tslog-fork": "^4.8.1"
   }
 }

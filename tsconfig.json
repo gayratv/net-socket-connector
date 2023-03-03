@@ -17,10 +17,17 @@
     "isolatedModules": true, // для esbuild
     "esModuleInterop": true ,
     "typeRoots": ["./node_modules/@types", "./types","types"],
-    "baseUrl": "./src",
     "declaration": true,
     "declarationDir": "./dist",
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": "src",
+    "paths": {
+      "log/*": ["logger/*"],
+      "config/*": ["app/_config/*"],
+      "helpers/*": ["net-socket/helpers/*"],
+    }
   },
   "include": ["src/**/*"],
   "exclude": [

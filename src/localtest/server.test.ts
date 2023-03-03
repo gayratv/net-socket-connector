@@ -1,5 +1,6 @@
 // для тестирования пакета
 import { delay, Executor, JobWorker, GetNextClientJob, ServerSocket, WorkerForServer } from '../net-socket/index.js';
+import { NLog } from '../logger/logger.implementation.js';
 
 let counter = 0;
 const workTestJob1: Executor<{ type: string; cnt: number }> = async (
@@ -28,9 +29,9 @@ const testJobWorker2: JobWorker<{ type: string; cnt: number }> = {
 };
 
 console.time('SRV1');
-const serverTest = new ServerSocket('SRV1');
+const serverTest = new ServerSocket('SRV1', NLog.getInstance());
 serverTest.createServer();
-const w = new WorkerForServer(serverTest);
+const w = new WorkerForServer(serverTest, NLog.getInstance());
 w.registerNewWorker(testJobWorker);
 w.registerNewWorker(testJobWorker2);
 serverTest.startQueTimer();

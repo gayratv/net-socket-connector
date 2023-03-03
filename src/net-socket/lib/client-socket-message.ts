@@ -2,7 +2,6 @@ import '../helpers/dotenv-init.js';
 import * as net from 'node:net';
 import type { ErrorNet, MessageToServer } from '../types/net-socket-types.js';
 import {
-  CLIENT_LOG_TIME_LABEL,
   CLIENT_WAIT_FOR_SERVER_ANSWER,
   MESSAGE_SEPARATOR,
   ServerResponce,
@@ -10,23 +9,22 @@ import {
   TBaseResultJob,
 } from '../types/net-socket-types.js';
 import { splitMessages } from '../helpers/socket-helpers.js';
+import { ILogger } from 'log/logger.interface.js';
 
 export class SocketMessaging<T extends TBaseResultJob> {
   clientSocket: net.Socket;
-  name: string;
+
   recievedServerMessages: Array<ServerResponceClient<T> & { timestamp: Date }> = [];
   private msgBuffer = '';
   currentQueryIndex = 0;
-  constructor(name: string) {
-    this.name = name;
-  }
+  constructor(public name: string, public log: ILogger) {}
   connect() {
     return new Promise((resolve, reject) => {
       this.clientSocket = net.connect(
         { port: parseInt(process.env.SOCKET_PORT, 10), host: process.env.SOCKET_HOST },
         () => {
           // listener for the 'connect' event once.
-          console.log(`${this.name} Connected to server!`);
+          this.log.info(`${this.name} Connected to server!`);
           resolve(true);
         },
       );
@@ -57,8 +55,8 @@ export class SocketMessaging<T extends TBaseResultJob> {
         //---->>>>>>>>
 
         this.recievedServerMessages = this.recievedServerMessages.concat(objArray);
-        // console.log(`  client ${this.name} Received data: `, msgArray);
-        console.timeLog(CLIENT_LOG_TIME_LABEL, `  client ${this.name} Received data: `, msgArray);
+        // this.log.info(`  client ${this.name} Received data: `, msgArray);
+        this.log.info(`  client ${this.name} Received data: `, msgArray);
 
         // удалим ответы старше CLIENT_WAIT_FOR_SERVER_ANSWER
         const timestampMs = timestamp.getTime();
@@ -68,12 +66,12 @@ export class SocketMessaging<T extends TBaseResultJob> {
       });
 
       this.clientSocket.on('end', () => {
-        console.log(`Soket ${this.name} Disconnected from server`);
+        this.log.info(`Soket ${this.name} Disconnected from server`);
       });
 
       this.clientSocket.on('error', (err: ErrorNet) => {
         if (err.code === 'ECONNREFUSED') {
-          console.log(`ECONNREFUSED can't connect to server`);
+          this.log.info(`ECONNREFUSED can't connect to server`);
           reject(err);
         } else {
           reject(err);
@@ -84,7 +82,7 @@ export class SocketMessaging<T extends TBaseResultJob> {
   }
 
   sendMsg(s: string) {
-    // console.log(this.client);
+    // this.log.info(this.client);
     return new Promise((resolve, reject) => {
       this.clientSocket.write(s + MESSAGE_SEPARATOR, 'utf8', (err?: Error) => {
         if (err) reject(err);

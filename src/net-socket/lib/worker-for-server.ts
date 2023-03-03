@@ -7,8 +7,8 @@ import {
   serverJobRecieved,
   workerJobDone,
 } from '../types/net-socket-types.js';
-import chalk from 'chalk';
 import { delay } from '../helpers/common.js';
+import { ILogger } from 'log/logger.interface.js';
 
 /*
 В задачи worker входит обработка очереди сервера
@@ -23,22 +23,20 @@ Refactor : сделаем несколько очередей для разны�
 // внутри ServerSocket лежит очередь клиентских запросов
 // queueClientsQuery: Record<string, ClientQuery> = {};
 export class WorkerForServer<TresultJob extends TBaseResultJob> {
-  private serverSocket: ServerSocket<TresultJob>;
   private registeredWorkers: Record<string, QueueOneTypeProcessing<TresultJob>> = {};
-  constructor(ee: ServerSocket<TresultJob>) {
-    this.serverSocket = ee;
-    ee.on(serverJobRecieved, this.worker);
+  constructor(private serverSocket: ServerSocket<TresultJob>, protected log: ILogger) {
+    this.serverSocket.on(serverJobRecieved, this.worker);
   }
 
   // запускаектся при появлении сообщения от сервера о том что пришло новое сообщение от клиента
   worker = (type: string) => {
-    console.log('WorkerForServer : получено сообщение о задании ', type);
+    this.log.info('WorkerForServer : получено сообщение о задании ', type);
 
     let worker = this.registeredWorkers[type];
 
     if (!worker) {
       // такой обработчие не зарегистрирован
-      console.error(chalk.red('Не найден обработчик для запроса '), type);
+      this.log.error(this.log.sw('Не найден обработчик для запроса ', 'red'), type);
       const workJob: Executor<{ type: string; err: string }> = async (
         demand: GetNextClientJob,
       ): Promise<{ type: string; err: string }> => {
@@ -61,7 +59,7 @@ export class WorkerForServer<TresultJob extends TBaseResultJob> {
   // обрабатывает один запрос из очереди
   processOneItem = async (type: string) => {
     const demand = this.serverSocket.getNextClientJobForType(type);
-    // console.log('processOneItem demand ', demand);
+    // this.log.info('processOneItem demand ', demand);
     // console.timeLog('SRV1', 'processOneItem demand', demand?.queItem?.queryIndex, demand?.index);
     if (!demand) {
       //  признак того, что очередь type свободна
@@ -72,7 +70,7 @@ export class WorkerForServer<TresultJob extends TBaseResultJob> {
     try {
       const workerForProcess = this.registeredWorkers[type];
       if (!workerForProcess) {
-        console.error(chalk.red('Не найден обработчик для запроса '), type);
+        this.log.error(this.log.sw('Не найден обработчик для запроса ', 'red'), type);
         const msgToServer: EventJobDoneArgs<TresultJob> = {
           demand,
           resultJob: {
