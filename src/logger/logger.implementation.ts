@@ -14,7 +14,7 @@ export class NLog implements ILogger {
     return NLog.instance;
   }
   private constructor() {
-    this.logger = new Logger<any>();
+    this.logger = new Logger<any>({ stackDepthLevel: 6 });
     this.logger.settings.stylePrettyLogs = true;
     this.logger.settings.prettyLogStyles = {
       logLevelName: {

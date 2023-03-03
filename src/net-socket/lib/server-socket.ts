@@ -15,7 +15,7 @@ import {
 } from '../types/net-socket-types.js';
 import { AddressInfo, Socket, Server, createServer } from 'node:net';
 import { splitMessages } from '../helpers/socket-helpers.js';
-import { ILogger } from 'log/logger.interface.js';
+import { ILogger } from '../../logger/logger.interface.js';
 function socketState(socket: Socket) {
   return `socketstate: ${socket.remoteAddress}:${socket.remotePort} -- ${socket.readyState}==${socket.remoteFamily}`;
 }

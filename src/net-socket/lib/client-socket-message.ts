@@ -9,7 +9,7 @@ import {
   TBaseResultJob,
 } from '../types/net-socket-types.js';
 import { splitMessages } from '../helpers/socket-helpers.js';
-import { ILogger } from 'log/logger.interface.js';
+import { ILogger } from '../../logger/logger.interface.js';
 
 export class SocketMessaging<T extends TBaseResultJob> {
   clientSocket: net.Socket;

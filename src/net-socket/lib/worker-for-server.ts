@@ -8,7 +8,7 @@ import {
   workerJobDone,
 } from '../types/net-socket-types.js';
 import { delay } from '../helpers/common.js';
-import { ILogger } from 'log/logger.interface.js';
+import { ILogger } from '../../logger/logger.interface.js';
 
 /*
 В задачи worker входит обработка очереди сервера

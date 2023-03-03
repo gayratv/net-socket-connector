@@ -4,6 +4,6 @@ export { ServerSocket } from './lib/server-socket.js';
 export { WorkerForServer } from './lib/worker-for-server.js';
 export { delay } from './helpers/common.js';
 // обязательный контракт для логера
-export type { ILogger, LoggerLevel } from 'log/logger.interface.js';
+export type { ILogger, LoggerLevel } from '../logger/logger.interface.js';
 // необязательная реализация логера
-export { NLog } from 'log/logger.implementation.js';
+export { NLog } from '../logger/logger.implementation.js';

@@ -1,6 +1,6 @@
 {
   "name": "resource-manager-socket",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "type": "module",
   "types": "./dist/net-socket/index.d.ts",
@@ -17,6 +17,7 @@
     "type-check": "tsc -noEmit",
     "pub": "npm publish --public",
     "server": "ts-node -r tsconfig-paths/register ./src/localtest/server.test.ts",
+    "server2": "ts-node -r ./tsconf-path.js ./src/localtest/server.test.ts",
     "client": "ts-node ./src/localtest/client.test.ts"
   },
   "keywords": [
@@ -53,6 +54,6 @@
   },
   "peerDependencies": {
     "dotenv": "^16.0.3",
-    "tslog-fork": "^4.8.1"
+    "tslog-fork": "^4.8.2"
   }
 }

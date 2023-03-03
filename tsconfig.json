@@ -9,23 +9,15 @@
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
     "skipLibCheck": true,
-    "importHelpers": true,
-    "allowUnreachableCode": false, // Сообщить об ошибке в случае обнаружения кода, который никогда не будет выполнен?
     "isolatedModules": true, // для esbuild
-    "esModuleInterop": true ,
+    "esModuleInterop": true , // Emit additional JavaScript to ease support for importing CommonJS modules. This enables `allowSyntheticDefaultImports` for type compatibility.
     "typeRoots": ["./node_modules/@types", "./types","types"],
     "declaration": true,
     "declarationDir": "./dist",
     "emitDeclarationOnly": true,
     "baseUrl": "src",
-    "paths": {
-      "log/*": ["logger/*"],
-      "config/*": ["app/_config/*"],
-      "helpers/*": ["net-socket/helpers/*"],
-    }
   },
   "include": ["src/**/*"],
   "exclude": [
