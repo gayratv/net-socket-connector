@@ -1,6 +1,6 @@
-import { SocketMessaging, MessageToServer, delay } from 'resource-manager-socket';
+import { SocketMessaging, MessageToServer, delay, NLog } from 'resource-manager-socket';
 
-const s = new SocketMessaging('s1');
+const s = new SocketMessaging('s1', NLog.getInstance());
 await s.connect();
 
 const m1: MessageToServer = { type: 'cntResponse', queryIndex: 2, payload: 0 };

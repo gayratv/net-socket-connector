@@ -1,4 +1,4 @@
-import { ServerSocket, WorkerForServer, delay } from 'resource-manager-socket';
+import { ServerSocket, WorkerForServer, delay, NLog } from 'resource-manager-socket';
 import type { Executor, GetNextClientJob, JobWorker } from 'resource-manager-socket';
 
 // для тестирования пакета
@@ -29,9 +29,9 @@ const testJobWorker2: JobWorker<{ type: string; cnt: number }> = {
 };
 
 console.time('SRV1');
-const serverTest = new ServerSocket('SRV1');
+const serverTest = new ServerSocket('SRV1', NLog.getInstance());
 serverTest.createServer();
-const w = new WorkerForServer(serverTest);
+const w = new WorkerForServer(serverTest, NLog.getInstance());
 w.registerNewWorker(testJobWorker);
 w.registerNewWorker(testJobWorker2);
 serverTest.startQueTimer();

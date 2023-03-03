@@ -19,7 +19,7 @@ build({
   format: 'esm',
   target: ['esnext'],
 
-  external: dep.concat(peerDep).concat(['fsevents', 'node:net']),
+  external: dep.concat(peerDep).concat(['node:net']),
   // ts входит в стандартный loader
   loader: { '.js': 'jsx', '.png': 'base64', '.ts': 'ts' },
   bundle: true,
@@ -28,7 +28,6 @@ build({
   treeShaking: false,
   // splitting: true,
   // plugins: [nodeExternalsPlugin()],
-  // minify: true,
 
   // minification
   minify: false,

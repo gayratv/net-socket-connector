@@ -20,8 +20,8 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "chalk": "^5.2.0",
+    "tslog-fork": "^4.8.1",
     "dotenv": "^16.0.3",
-    "resource-manager-socket": "^1.0.0"
+    "resource-manager-socket": "^1.0.3"
   }
 }
