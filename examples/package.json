@@ -8,7 +8,7 @@
   },
   "scripts": {
     "server": "ts-node ./src/test/server.test.ts",
-    "client": "ts-node ./src/test/client.test.ts",
+    "client": "ts-node src/test/client.test1.ts",
     "tsc": "tsc -noEmit"
   },
   "keywords": [],
