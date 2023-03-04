@@ -94,6 +94,9 @@ export class SocketMessaging<T extends TBaseResultJob> {
   end() {
     this.clientSocket.end();
   }
+  resetAndDestroy() {
+    this.clientSocket.resetAndDestroy();
+  }
 
   isConnected() {
     return this.clientSocket.writable;

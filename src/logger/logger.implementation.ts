@@ -1,5 +1,5 @@
 import { TStyle, styleWrap as styleWrapSrc, Logger } from 'tslog-fork';
-import { ILogger } from './logger.interface.js';
+import { ILogger, LoggerLevel } from './logger.interface.js';
 
 // singleton
 export class NLog implements ILogger {
@@ -16,6 +16,7 @@ export class NLog implements ILogger {
   private constructor() {
     this.logger = new Logger<any>({ stackDepthLevel: 6 });
     this.logger.settings.stylePrettyLogs = true;
+    this.logger.settings.prettyInspectOptions = { colors: true, compact: true, sorted: false };
     this.logger.settings.prettyLogStyles = {
       logLevelName: {
         '*': ['bold', 'black', 'bgWhiteBright', 'dim'],
@@ -42,7 +43,7 @@ export class NLog implements ILogger {
     this.logger.log(logLevel, '', ...args);
   }
   silly(...args: unknown[]) {
-    this.logger.silly(...args);
+    this.logger.log(LoggerLevel.silly, '', ...args);
   }
   trace(...args: unknown[]) {
     this.logger.trace(...args);

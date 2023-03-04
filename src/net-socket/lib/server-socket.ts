@@ -38,7 +38,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
 
   async createServer() {
     this.server = createServer((socket) => {
-      // this.log.info('Client connected ', socketState(socket));
+      // this.log.silly('Client connected ', socketState(socket));
 
       socket.on('data', (data) => {
         const keySocket = `${socket.remoteAddress}:${socket.remotePort}`;
@@ -46,10 +46,10 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
 
         const msgArray = splitMessages(this.msgBuffer + data.toString());
         /* if (this.msgBuffer) {
-          this.log.info('');
-          this.log.info(chalk.green('Остаток '), this.msgBuffer);
-          this.log.info(msgArray[0]);
-          this.log.info('--------');
+          this.log.silly('');
+          this.log.silly(chalk.green('Остаток '), this.msgBuffer);
+          this.log.silly(msgArray[0]);
+          this.log.silly('--------');
         }*/
         this.msgBuffer = '';
 
@@ -61,7 +61,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
             res = JSON.parse(val); // преобразуем в объекты
             objArray.push(res);
           } catch (e) {
-            // this.log.info(chalk.red(`createServer socket.on can't convert to object`), val);
+            // this.log.silly(chalk.red(`createServer socket.on can't convert to object`), val);
             isRestMsg = true;
           }
         });
@@ -70,7 +70,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
         // последний символ не краб
         if (isRestMsg && !lastMsg.endsWith(MESSAGE_SEPARATOR)) this.msgBuffer = lastMsg;
 
-        this.log.info('Recieved message from client : ', keySocket, ' cntMessages ', msgArray.length);
+        this.log.silly('Recieved message from client : ', keySocket, ' cntMessages ', msgArray.length);
 
         // извещаем worker что появилась работа type
         const typeMap = new Map();
@@ -95,12 +95,12 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
 
       socket.on('end', () => {
         this.deleteClientRequestAfterSocketClose(socket);
-        this.log.info(this.log.sw('Client disconnected ', ['yellow', 'bold']), socketState(socket));
+        this.log.silly(this.log.sw('Client disconnected ', ['yellow', 'bold']), socketState(socket));
       });
 
       socket.on('error', (err: ErrorNet) => {
         if (err.code === 'ECONNRESET') {
-          this.log.info(this.log.sw('ECONNRESET Client connection reset ', ['yellow', 'bold']), socketState(socket));
+          this.log.silly(this.log.sw('ECONNRESET Client connection reset ', ['yellow', 'bold']), socketState(socket));
         } else {
           this.log.error(this.log.sw(`Socket unknown error: ${err}`, 'red'));
         }
@@ -108,8 +108,9 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
       });
     });
 
+    // установлено соединение с клиентом
     this.server.on('connection', (socket) => {
-      this.log.info(
+      this.log.silly(
         this.log.sw(
           `${this.name} Client connection details - ${socket.remoteAddress}:${socket.remotePort}`,
           'bgBlackBright',
@@ -119,7 +120,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
     });
 
     this.server.on('close', (socket: Socket) => {
-      this.log.info('Close connection', socket.address());
+      this.log.silly('Close connection', socket.address());
     });
 
     this.server.on('error', (err) => {
@@ -127,13 +128,13 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
     });
 
     this.server.listen(parseInt(process.env.SOCKET_PORT, 10), () => {
-      this.log.info(`${this.name} opened server on port ${(this.server.address() as AddressInfo).port}`);
-      this.log.info(this.server.address());
+      this.log.silly(`${this.name} opened server on port ${(this.server.address() as AddressInfo).port}`);
+      this.log.silly(this.server.address());
     });
 
     // worker успешно выполнил задачу
     super.on(workerJobDone, (args: EventJobDoneArgs<TresultJob>) => {
-      this.log.info(
+      this.log.silly(
         'SRV1',
         workerJobDone,
         args.demand.queItem.key,
@@ -162,13 +163,13 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
   }
 
   printQue = () => {
-    this.log.info('---------- QUEUE -------------');
+    this.log.silly('---------- QUEUE -------------');
     this.clientQueues.forEach((val) => {
-      this.log.info(`${val.key} -- ${val.type}:${val.queryIndex}`);
+      this.log.silly(`${val.key} -- ${val.type}:${val.queryIndex}`);
     });
   };
   printQueShort = () => {
-    this.log.info('---------- QUEUE ------------- ', this.clientQueues.length);
+    this.log.silly('---------- QUEUE ------------- ', this.clientQueues.length);
   };
 
   startQueTimer() {
@@ -183,7 +184,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
     const ind = this.clientQueues.findIndex((val) => !val.inProcessState);
     if (ind >= 0) {
       const elem = this.clientQueues[ind];
-      // elem.inProcessState = true; - worker проверит сам
+      elem.inProcessState = true; // запрос передан в работу
       return { queItem: elem, index: ind };
     } else return null; // все задания находятся в работе
   }
@@ -194,7 +195,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
     const ind = this.clientQueues.findIndex((val) => !val.inProcessState && val.type === type);
     if (ind >= 0) {
       const elem = this.clientQueues[ind];
-      // elem.inProcessState = true; - worker проверит сам
+      elem.inProcessState = true; // запрос передан в работу
       return { queItem: elem, index: ind };
     } else return null; // все задания находятся в работе
   }
@@ -223,11 +224,5 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
     Reflect.deleteProperty(this.clientsSocket, keySocket);
     //   удалить все необработанные сообщения из очереди
     this.clientQueues = this.clientQueues.filter((val) => !(val.key === keySocket && !val.inProcessState));
-    /*
-    while (true) {
-      const ind = this.clientQueues.findIndex((val) => val.key === keySocket && !val.inProcessState);
-      if (ind < 0) break;
-      else this.clientQueues.splice(ind, 1);
-    }*/
   }
 }
