@@ -38,7 +38,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
 
   async createServer() {
     this.server = createServer((socket) => {
-      // console.log('Client connected ', socketState(socket));
+      // this.log.info('Client connected ', socketState(socket));
 
       socket.on('data', (data) => {
         const keySocket = `${socket.remoteAddress}:${socket.remotePort}`;
@@ -46,10 +46,10 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
 
         const msgArray = splitMessages(this.msgBuffer + data.toString());
         /* if (this.msgBuffer) {
-          console.log('');
-          console.log(chalk.green('Остаток '), this.msgBuffer);
-          console.log(msgArray[0]);
-          console.log('--------');
+          this.log.info('');
+          this.log.info(chalk.green('Остаток '), this.msgBuffer);
+          this.log.info(msgArray[0]);
+          this.log.info('--------');
         }*/
         this.msgBuffer = '';
 
@@ -61,7 +61,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
             res = JSON.parse(val); // преобразуем в объекты
             objArray.push(res);
           } catch (e) {
-            // console.log(chalk.red(`createServer socket.on can't convert to object`), val);
+            // this.log.info(chalk.red(`createServer socket.on can't convert to object`), val);
             isRestMsg = true;
           }
         });
@@ -70,7 +70,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
         // последний символ не краб
         if (isRestMsg && !lastMsg.endsWith(MESSAGE_SEPARATOR)) this.msgBuffer = lastMsg;
 
-        console.log('Recieved message from client : ', keySocket, ' cntMessages ', msgArray.length);
+        this.log.info('Recieved message from client : ', keySocket, ' cntMessages ', msgArray.length);
 
         // извещаем worker что появилась работа type
         const typeMap = new Map();
@@ -102,7 +102,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
         if (err.code === 'ECONNRESET') {
           this.log.info(this.log.sw('ECONNRESET Client connection reset ', ['yellow', 'bold']), socketState(socket));
         } else {
-          this.log.info(this.log.sw(`Socket unknown error: ${err}`, 'red'));
+          this.log.error(this.log.sw(`Socket unknown error: ${err}`, 'red'));
         }
         this.deleteClientRequestAfterSocketClose(socket);
       });
@@ -119,16 +119,16 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
     });
 
     this.server.on('close', (socket: Socket) => {
-      console.log('Close connection', socket.address());
+      this.log.info('Close connection', socket.address());
     });
 
     this.server.on('error', (err) => {
-      console.log(err);
+      this.log.error(err);
     });
 
     this.server.listen(parseInt(process.env.SOCKET_PORT, 10), () => {
-      console.log(`${this.name} opened server on port ${(this.server.address() as AddressInfo).port}`);
-      console.log(this.server.address());
+      this.log.info(`${this.name} opened server on port ${(this.server.address() as AddressInfo).port}`);
+      this.log.info(this.server.address());
     });
 
     // worker успешно выполнил задачу
@@ -162,13 +162,13 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
   }
 
   printQue = () => {
-    console.log('---------- QUEUE -------------');
+    this.log.info('---------- QUEUE -------------');
     this.clientQueues.forEach((val) => {
-      console.log(`${val.key} -- ${val.type}:${val.queryIndex}`);
+      this.log.info(`${val.key} -- ${val.type}:${val.queryIndex}`);
     });
   };
   printQueShort = () => {
-    console.log('---------- QUEUE ------------- ', this.clientQueues.length);
+    this.log.info('---------- QUEUE ------------- ', this.clientQueues.length);
   };
 
   startQueTimer() {
