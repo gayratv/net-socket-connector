@@ -1,6 +1,6 @@
 {
   "name": "resource-manager-socket",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "",
   "type": "module",
   "types": "./dist/net-socket/index.d.ts",
