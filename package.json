@@ -1,6 +1,6 @@
 {
-  "name": "resource-manager-socket",
-  "version": "1.0.7",
+  "name": "net-socket-connector",
+  "version": "1.0.0",
   "description": "",
   "type": "module",
   "types": "./dist/net-socket/index.d.ts",
@@ -16,9 +16,10 @@
     "build": "rimraf dist && rimraf tsconfig.tsbuildinfo && node ./scripts/esbuild.js && tsc",
     "type-check": "tsc -noEmit",
     "pub": "npm publish --public",
-    "server": "ts-node -r tsconfig-paths/register ./src/localtest/server.test.ts",
     "server2": "ts-node -r ./tsconf-path.js ./src/localtest/server.test.ts",
-    "client": "ts-node ./src/localtest/client.test.ts"
+    "server": "ts-node -r tsconfig-paths/register ./src/localtest/server.test.ts",
+    "client2": "ts-node ./src/localtest/client2.test.ts",
+    "client-queue": "ts-node ./src/localtest/client4.queue.print.ts"
   },
   "keywords": [
     "socket",

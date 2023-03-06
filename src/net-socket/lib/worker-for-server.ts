@@ -3,6 +3,7 @@ import { ServerSocket } from './server-socket.js';
 import type { Executor, GetNextClientJob, JobWorker, TBaseResultJob } from '../types/net-socket-types.js';
 import {
   EventJobDoneArgs,
+  JobSrvQueuePrintType,
   QueueOneTypeProcessing,
   serverJobRecieved,
   workerJobDone,
@@ -24,8 +25,10 @@ Refactor : сделаем несколько очередей для разны�
 // queueClientsQuery: Record<string, ClientQuery> = {};
 export class WorkerForServer<TresultJob extends TBaseResultJob> {
   private registeredWorkers: Record<string, QueueOneTypeProcessing<TresultJob>> = {};
-  constructor(private serverSocket: ServerSocket<TresultJob>, protected log: ILogger) {
+  constructor(public serverSocket: ServerSocket<TresultJob>, protected log: ILogger) {
     this.serverSocket.on(serverJobRecieved, this.worker);
+    this.registerSystemErrorJober();
+    this.registerJobSrvQueuePrint();
   }
 
   // запускаектся при появлении сообщения от сервера о том что пришло новое сообщение от клиента
@@ -104,5 +107,43 @@ export class WorkerForServer<TresultJob extends TBaseResultJob> {
       runner: workForJob.executor,
       demandQueIsProcessing: false,
     };
+  }
+
+  /*
+   * зарегистрировать специальный worker для обработки ошибочных сообщений серверу
+   */
+  private registerSystemErrorJober() {
+    const WjobErrMsg = 'errMsgFromClient';
+    interface TjobErrMsg extends TBaseResultJob {
+      type: string;
+      err: string;
+      msg: string;
+    }
+
+    const jobErrMsg: JobWorker<TjobErrMsg> = {
+      type: WjobErrMsg,
+      executor: async (demand: GetNextClientJob): Promise<TjobErrMsg> => {
+        return { type: WjobErrMsg, msg: 'ошибка в сообщении к серверу', err: demand.queItem.payload };
+      },
+    };
+
+    this.registerNewWorker(jobErrMsg as unknown as JobWorker<TresultJob>);
+  }
+
+  /*
+   * jober для печати очереди сервера
+   */
+  private registerJobSrvQueuePrint() {
+    // Печать очереди
+    type TjobSrvQueuePrint = { type: string };
+
+    const jobSrvQueuePrint: JobWorker<TjobSrvQueuePrint> = {
+      type: JobSrvQueuePrintType,
+      executor: async (demand: GetNextClientJob): Promise<TjobSrvQueuePrint> => {
+        this.serverSocket.printQue();
+        return { type: JobSrvQueuePrintType };
+      },
+    };
+    this.registerNewWorker(jobSrvQueuePrint as unknown as JobWorker<TresultJob>);
   }
 }

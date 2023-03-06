@@ -7,7 +7,9 @@ import {
   EventJobDoneArgs,
   GetNextClientJob,
   MAX_JOB_RETRYES,
+  MaxInternalIndex,
   MESSAGE_SEPARATOR,
+  MessageToServer,
   serverJobRecieved,
   ServerResponce,
   TBaseResultJob,
@@ -16,6 +18,7 @@ import {
 import { AddressInfo, Socket, Server, createServer } from 'node:net';
 import { splitMessages } from '../helpers/socket-helpers.js';
 import { ILogger } from '../../logger/logger.interface.js';
+import { validateMsgToServer } from '../helpers/validate.js';
 function socketState(socket: Socket) {
   return `socketstate: ${socket.remoteAddress}:${socket.remotePort} -- ${socket.readyState}==${socket.remoteFamily}`;
 }
@@ -27,6 +30,8 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
   // по ключю ${socket.remoteAddress}:${socket.remotePort} идентифицируется socket, который выдал запрос
   // на будущее оставлю locked?: boolean; timestamp
   clientQueues: Array<Demand> = [];
+  // внутренний индекс
+  private clientQueuesCounter = 0;
 
   // внутренний счетчик сервера для учета сообщений клиента - сообщения будут искаться по этому номеру
   private server: Server;
@@ -72,6 +77,18 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
 
         this.log.silly('Recieved message from client : ', keySocket, ' cntMessages ', msgArray.length);
 
+        // валидируем тип входящего сообщения
+        for (let i = 0; i < objArray.length; i++) {
+          if (!validateMsgToServer(objArray[i])) {
+            const newMsg: MessageToServer = {
+              type: 'errMsgFromClient',
+              queryIndex: objArray[i].queryIndex ?? 0,
+              payload: JSON.stringify(objArray[i]),
+            };
+            objArray[i] = newMsg;
+          }
+        }
+
         // извещаем worker что появилась работа type
         const typeMap = new Map();
         objArray.forEach((val) => {
@@ -82,6 +99,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
             payload: val.payload,
             errorCount: 0,
             inProcessState: false,
+            internalIndex: this.getInternalIndex(),
           };
           this.clientQueues.push(d);
           typeMap.set(val.type, true);
@@ -148,7 +166,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
       const socket = this.clientsSocket[args.demand.queItem.key];
       if (socket) {
         const type = args.resultJob.type ?? 'unknown type'; // определяет worker
-        const resultJob = args.resultJob;
+        const resultJob = { ...args.resultJob };
         Reflect.deleteProperty(resultJob, 'type'); // чтобы type два раза не дублировался
         const responce: ServerResponce<TresultJob> = {
           type,
@@ -163,10 +181,19 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
   }
 
   printQue = () => {
-    this.log.silly('---------- QUEUE -------------');
-    this.clientQueues.forEach((val) => {
-      this.log.silly(`${val.key} -- ${val.type}:${val.queryIndex}`);
+    this.log.info(`---------- QUEUE PRINT ITEMS count ${this.clientQueues.length}-------------`);
+
+    /*this.clientQueues.forEach((val) => {
+      // this.log.silly(`${val.key} -- ${val.type}:${val.queryIndex}`);
+      this.log.silly(`\t ${val.type}:${val.queryIndex}`);
     });
+    */
+
+    for (let i = 0; i < this.clientQueues.length; i++) {
+      const val = this.clientQueues[i];
+      this.log.silly(`\t ${i} : ${val.type}:${val.queryIndex} client ${val.key}`);
+    }
+    this.log.info(`---------- QUEUE PRINT ITEMS FINISH -------------`);
   };
   printQueShort = () => {
     this.log.silly('---------- QUEUE ------------- ', this.clientQueues.length);
@@ -200,8 +227,9 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
     } else return null; // все задания находятся в работе
   }
 
-  removeQueueElement(demand: { queItem: Demand; index: number }) {
-    this.clientQueues.splice(demand.index, 1);
+  removeQueueElement(demand: GetNextClientJob) {
+    const ind = this.clientQueues.findIndex((value) => value.internalIndex === demand.queItem.internalIndex);
+    if (ind >= 0) this.clientQueues.splice(ind, 1);
   }
 
   // поместить запрос в конец очереди такая потребность возникает когда worker не смог обработать запрос
@@ -224,5 +252,10 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
     Reflect.deleteProperty(this.clientsSocket, keySocket);
     //   удалить все необработанные сообщения из очереди
     this.clientQueues = this.clientQueues.filter((val) => !(val.key === keySocket && !val.inProcessState));
+  }
+
+  private getInternalIndex(): number {
+    if (this.clientQueuesCounter + 1 > MaxInternalIndex) this.clientQueuesCounter = 0;
+    return this.clientQueuesCounter++;
   }
 }

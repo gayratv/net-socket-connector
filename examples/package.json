@@ -8,7 +8,7 @@
   },
   "scripts": {
     "server": "ts-node ./src/test/server.test.ts",
-    "client": "ts-node src/test/client.test1.ts",
+    "client": "ts-node -r tsconfig-paths/register ./src/test/client.test3.ts",
     "tsc": "tsc -noEmit"
   },
   "keywords": [],
@@ -22,6 +22,6 @@
   "dependencies": {
     "tslog-fork": "^4.8.2",
     "dotenv": "^16.0.3",
-    "resource-manager-socket": "^1.0.4"
+    "net-socket-connector": "^1.0.0"
   }
 }

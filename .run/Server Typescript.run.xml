@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Server Typescript" type="NodeJSConfigurationType" application-parameters="$FilePathRelativeToProjectRoot$" path-to-node="node" node-parameters="--loader ts-node/esm " working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>

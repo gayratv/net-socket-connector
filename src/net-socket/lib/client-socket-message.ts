@@ -1,7 +1,13 @@
 import '../helpers/dotenv-init.js';
 import * as net from 'node:net';
 import type { ErrorNet, MessageToServer } from '../types/net-socket-types.js';
-import { MESSAGE_SEPARATOR, ServerResponce, ServerResponceClient, TBaseResultJob } from '../types/net-socket-types.js';
+import {
+  JobSrvQueuePrintType,
+  MESSAGE_SEPARATOR,
+  ServerResponce,
+  ServerResponceClient,
+  TBaseResultJob,
+} from '../types/net-socket-types.js';
 import { splitMessages } from '../helpers/socket-helpers.js';
 import { ILogger } from '../../logger/logger.interface.js';
 
@@ -116,7 +122,7 @@ export class SocketMessagingClient<T extends TBaseResultJob> {
 
       // сразу запустим таймер, который прервет любое ожидание
       const timeHandle = setTimeout(() => {
-        reject({ err: 'не додались ответа сервера' });
+        reject({ err: 'не дождались ответа сервера' });
       }, this.clientWaitForServerAnswer);
 
       // поскольку мы только что передали запрос - то ответа от сервера в очереди быть еще не может и надо ждать данных
@@ -148,5 +154,13 @@ export class SocketMessagingClient<T extends TBaseResultJob> {
     await this.sendMsg(JSON.stringify(m));
     // ждать ответа сервера
     return await this.waitForServerAnswer(typePararm, curQuery);
+  }
+
+  async printServerQueue() {
+    const curQuery = this.currentQueryIndex++;
+    const m: MessageToServer = { type: JobSrvQueuePrintType, queryIndex: curQuery };
+    await this.sendMsg(JSON.stringify(m));
+    // ждать ответа сервера
+    return await this.waitForServerAnswer(JobSrvQueuePrintType, curQuery);
   }
 }
