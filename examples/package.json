@@ -1,6 +1,6 @@
 {
   "name": "net-socket-manager-test",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "type": "module",
   "engines": {
@@ -22,6 +22,6 @@
   "dependencies": {
     "tslog-fork": "^4.8.2",
     "dotenv": "^16.0.3",
-    "net-socket-connector": "^1.0.0"
+    "net-socket-connector": "^1.0.3"
   }
 }

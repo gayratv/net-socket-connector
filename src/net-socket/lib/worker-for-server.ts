@@ -147,3 +147,17 @@ export class WorkerForServer<TresultJob extends TBaseResultJob> {
     this.registerNewWorker(jobSrvQueuePrint as unknown as JobWorker<TresultJob>);
   }
 }
+
+export function createNewJober<T extends TBaseResultJob>(
+  type: string,
+  w: WorkerForServer<any>,
+  runner: (demand: GetNextClientJob) => Promise<T>,
+): void {
+  const jobWorker: JobWorker<T> = {
+    type: type,
+    executor: async (demand: GetNextClientJob): Promise<T> => {
+      return await runner(demand);
+    },
+  };
+  w.registerNewWorker(jobWorker);
+}
