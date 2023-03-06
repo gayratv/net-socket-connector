@@ -1,7 +1,7 @@
-import { delay, SocketMessaging } from '../net-socket/index.js';
+import { delay, SocketMessagingClient } from '../net-socket/index.js';
 import { NLog } from '../logger/logger.implementation.js';
 
-const s = new SocketMessaging('s1', NLog.getInstance());
+const s = new SocketMessagingClient('s1', NLog.getInstance());
 await s.connect();
 
 //  нет обработчика

@@ -1,7 +1,7 @@
-import { SocketMessaging, MessageToServer, delay } from '../net-socket/index.js';
+import { SocketMessagingClient, MessageToServer, delay } from '../net-socket/index.js';
 import { NLog } from '../logger/logger.implementation.js';
 
-const s = new SocketMessaging('s1', NLog.getInstance());
+const s = new SocketMessagingClient('s1', NLog.getInstance());
 await s.connect();
 
 for (let i = 1; i < 1000; i++) {

@@ -91,7 +91,7 @@ w.registerNewWorker(testJobWorker);
 ## Инициализация клиента
 
 ```js
-const s = new SocketMessaging('s1');
+const s = new SocketMessagingClient('s1');
 await s.connect();
 ```
 Информация для соединения с сервером берется из файла .env

@@ -1,23 +1,20 @@
 import '../helpers/dotenv-init.js';
 import * as net from 'node:net';
 import type { ErrorNet, MessageToServer } from '../types/net-socket-types.js';
-import {
-  CLIENT_WAIT_FOR_SERVER_ANSWER,
-  MESSAGE_SEPARATOR,
-  ServerResponce,
-  ServerResponceClient,
-  TBaseResultJob,
-} from '../types/net-socket-types.js';
+import { MESSAGE_SEPARATOR, ServerResponce, ServerResponceClient, TBaseResultJob } from '../types/net-socket-types.js';
 import { splitMessages } from '../helpers/socket-helpers.js';
 import { ILogger } from '../../logger/logger.interface.js';
 
-export class SocketMessaging<T extends TBaseResultJob> {
+export class SocketMessagingClient<T extends TBaseResultJob> {
   clientSocket: net.Socket;
 
   recievedServerMessages: Array<ServerResponceClient<T> & { timestamp: Date }> = [];
   private msgBuffer = '';
   currentQueryIndex = 0;
-  constructor(public name: string, public log: ILogger) {}
+  /*
+   * clientWaitForServerAnswer - максимальное время ожидания клиентом ответа от сервера
+   */
+  constructor(public name: string, public log: ILogger, public clientWaitForServerAnswer = 20_000) {}
   connect() {
     return new Promise((resolve, reject) => {
       this.clientSocket = net.connect(
@@ -61,7 +58,7 @@ export class SocketMessaging<T extends TBaseResultJob> {
         // удалим ответы старше CLIENT_WAIT_FOR_SERVER_ANSWER
         const timestampMs = timestamp.getTime();
         this.recievedServerMessages = this.recievedServerMessages.filter(
-          (val) => Math.abs(val.timestamp.getTime() - timestampMs) < CLIENT_WAIT_FOR_SERVER_ANSWER,
+          (val) => Math.abs(val.timestamp.getTime() - timestampMs) < this.clientWaitForServerAnswer,
         );
       });
 
@@ -117,10 +114,10 @@ export class SocketMessaging<T extends TBaseResultJob> {
     return new Promise(async (resolve, reject) => {
       // проверим пришел ли ответ ожидаемого типа
 
-      // сразу запустим таймер который прервет любое ожидание
+      // сразу запустим таймер, который прервет любое ожидание
       const timeHandle = setTimeout(() => {
         reject({ err: 'не додались ответа сервера' });
-      }, CLIENT_WAIT_FOR_SERVER_ANSWER);
+      }, this.clientWaitForServerAnswer);
 
       // поскольку мы только что передали запрос - то ответа от сервера в очереди быть еще не может и надо ждать данных
       await this.serverAnswered();
