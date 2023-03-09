@@ -6,6 +6,7 @@ export class SimpleLog implements ILogger {
   constructor() {
     this.logger = new Logger<any>({ stackDepthLevel: 6 });
     this.logger.settings.stylePrettyLogs = true;
+    this.logger.settings.prettyLogTimeZone = 'local';
     this.logger.settings.prettyInspectOptions = { colors: true, compact: true, sorted: false };
     this.logger.settings.prettyLogStyles = {
       logLevelName: {
@@ -27,7 +28,8 @@ export class SimpleLog implements ILogger {
       fileName: ['yellow'],
       fileNameWithLine: 'white',
     };
-    this.logger.settings.prettyLogTemplate = '{{hh}}:{{MM}}:{{ss}} {{logLevelName}} [{{fileNameWithLine}}] ';
+    this.logger.settings.prettyLogTemplate =
+      '{{hh}}:{{MM}}:{{ss}} {{logLevelName}} [{{fileNameWithLine}}] {{secDuration}} ';
   }
   log(logLevel: number, ...args: unknown[]) {
     this.logger.log(logLevel, '', ...args);

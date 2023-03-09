@@ -1,6 +1,6 @@
 {
   "name": "net-socket-connector",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "",
   "type": "module",
   "types": "./dist/net-socket/index.d.ts",
@@ -55,6 +55,6 @@
   },
   "peerDependencies": {
     "dotenv": "^16.0.3",
-    "tslog-fork": "^4.8.2"
+    "tslog-fork": "^4.8.11"
   }
 }

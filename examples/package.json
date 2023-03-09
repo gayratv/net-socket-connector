@@ -20,8 +20,8 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "tslog-fork": "^4.8.2",
+    "tslog-fork": "^4.8.11",
     "dotenv": "^16.0.3",
-    "net-socket-connector": "^1.0.3"
+    "net-socket-connector": "^1.0.4"
   }
 }
