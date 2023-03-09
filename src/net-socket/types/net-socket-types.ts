@@ -51,15 +51,20 @@ export interface Demand extends MessageToServer {
 // используется для ротации индекса
 export const MaxInternalIndex = 64000;
 
+export type Formater<TresultJob> = (arg: EventJobDoneArgs<TresultJob>) => string;
+
 /*
  * executor должен возвращать объект в котором как минимум должно быть {type:string} а также результат работы
  *
  * type - определяет тип, на который реагирует обработчик события
  * он должен быть уникальным для каждого обработчика
+ *
+ * formater - форматирует резуьтат работы в строку
  */
 export type JobWorker<TresultJob extends TBaseResultJob> = {
   type: string;
   executor: Executor<TresultJob>;
+  formater?: Formater<TresultJob>;
 };
 
 export type Executor<TresultJob extends TBaseResultJob> = (demand: GetNextClientJob) => Promise<TresultJob>;
@@ -68,13 +73,14 @@ export type QueueOneTypeProcessing<TresultJob extends TBaseResultJob> = {
   demandQueIsProcessing: boolean; // очередь сообщений обрабатывается
   type: string;
   runner: Executor<TresultJob>;
+  formater?: Formater<TresultJob>;
 };
 
 /*
  * При завершении работы worker извещает сервер, что работа сделана путем отправки сообщения
  * T - тип в котором записаны результаты работы worker
  */
-export type EventJobDoneArgs<T> = { demand: GetNextClientJob; resultJob: T };
+export type EventJobDoneArgs<T> = { demand: GetNextClientJob; resultJob: T; formater?: Formater<T> };
 
 /*
  * GetNextClientJob - тип сервера для извлечения следующего запроса клиента

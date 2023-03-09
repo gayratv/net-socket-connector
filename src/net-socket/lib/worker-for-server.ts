@@ -1,6 +1,6 @@
 // подписывается на событыие сервера и выполняет работу
 import { ServerSocket } from './server-socket.js';
-import type { Executor, GetNextClientJob, JobWorker, TBaseResultJob } from '../types/net-socket-types.js';
+import type { Executor, Formater, GetNextClientJob, JobWorker, TBaseResultJob } from '../types/net-socket-types.js';
 import {
   EventJobDoneArgs,
   JobSrvQueuePrintType,
@@ -8,8 +8,14 @@ import {
   serverJobRecieved,
   workerJobDone,
 } from '../types/net-socket-types.js';
-import { delay } from '../helpers/common.js';
+import { delay, getPort, objectToString } from '../helpers/common.js';
 import { ILogger } from '../../logger/logger.interface.js';
+
+export const defaultFormater: Formater<any> = (args: EventJobDoneArgs<any>) => {
+  return `${workerJobDone} queryIndex ${args.demand.queItem.queryIndex}  cliIp : ${getPort(
+    args.demand.queItem.key,
+  )} JobResult : ${objectToString(args.resultJob)}`;
+};
 
 /*
 В задачи worker входит обработка очереди сервера
@@ -80,12 +86,17 @@ export class WorkerForServer<TresultJob extends TBaseResultJob> {
             type: demand.queItem.type,
             err: `ERROR - could not process` + demand.queItem.type,
           } as unknown as TresultJob,
+          formater: workerForProcess.formater,
         };
         this.serverSocket.emit(workerJobDone, msgToServer);
       } else {
         workerForProcess.demandQueIsProcessing = true; // очередь type занята работой
         const result = await workerForProcess.runner(demand);
-        const msgToServer: EventJobDoneArgs<TresultJob> = { demand, resultJob: result };
+        const msgToServer: EventJobDoneArgs<TresultJob> = {
+          demand,
+          resultJob: result,
+          formater: workerForProcess.formater,
+        };
         this.serverSocket.emit(workerJobDone, msgToServer);
       }
     } catch (err) {
@@ -106,6 +117,7 @@ export class WorkerForServer<TresultJob extends TBaseResultJob> {
       type: workForJob.type,
       runner: workForJob.executor,
       demandQueIsProcessing: false,
+      formater: workForJob.formater ? workForJob.formater : defaultFormater,
     };
   }
 

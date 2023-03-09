@@ -19,6 +19,7 @@ import { AddressInfo, Socket, Server, createServer } from 'node:net';
 import { splitMessages } from '../helpers/socket-helpers.js';
 import { ILogger } from '../../logger/logger.interface.js';
 import { validateMsgToServer } from '../helpers/validate.js';
+import { defaultFormater } from './worker-for-server.js';
 function socketState(socket: Socket) {
   return `socketstate: ${socket.remoteAddress}:${socket.remotePort} -- ${socket.readyState}==${socket.remoteFamily}`;
 }
@@ -152,15 +153,17 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
 
     // worker успешно выполнил задачу
     super.on(workerJobDone, (args: EventJobDoneArgs<TresultJob>) => {
-      this.log.silly(
-        'SRV1',
+      /* this.log.silly(
         workerJobDone,
+        ' queryIndex ',
+        args.demand.queItem.queryIndex,
         args.demand.queItem.key,
         ' JobResult ',
         args.resultJob,
-        ' queryIndex ',
-        args.demand.queItem.queryIndex,
-      );
+      ); */
+
+      const logText = args.formater ? args.formater(args) : defaultFormater(args);
+      this.log.silly(logText);
 
       //   теперь отправим результат клиенту
       const socket = this.clientsSocket[args.demand.queItem.key];
