@@ -35,6 +35,12 @@ export class WorkerForServer<TresultJob extends TBaseResultJob> {
     this.serverSocket.on(serverJobRecieved, this.worker);
     this.registerSystemErrorJober();
     this.registerJobSrvQueuePrint();
+
+    // add ping/pong jobber to check server is living
+    let counter1 = 0;
+    createNewJober<{ type: string; pong: number }>('ping', this, async (demand: GetNextClientJob) => {
+      return { type: demand.queItem.type, pong: counter1++ };
+    });
   }
 
   // запускаектся при появлении сообщения от сервера о том что пришло новое сообщение от клиента
