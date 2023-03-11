@@ -30,6 +30,7 @@ export type ServerResponceClient<T> = {
   type: string; // определяет worker
   queryIndex: number; // число ранее полученное от клиента
   resultJob: T; // результат работы - грубо говоря any
+  timestamp: Date;
 };
 
 /*

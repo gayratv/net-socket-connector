@@ -14,7 +14,7 @@ import { ILogger } from '../../logger/logger.interface.js';
 export class SocketMessagingClient<T extends TBaseResultJob> {
   clientSocket: net.Socket;
 
-  recievedServerMessages: Array<ServerResponceClient<T> & { timestamp: Date }> = [];
+  recievedServerMessages: Array<ServerResponceClient<T>> = [];
   private msgBuffer = '';
   currentQueryIndex = 0;
   /*
@@ -113,10 +113,10 @@ export class SocketMessagingClient<T extends TBaseResultJob> {
   }
 
   // ждать ответа определенного типа
-  waitForServerAnswer = async (
+  waitForServerAnswer = async <T2>(
     typeParam: string,
     queryIndex: number,
-  ): Promise<(ServerResponceClient<T> & { timestamp: Date }) | { err: string }> => {
+  ): Promise<ServerResponceClient<T2> | { err: string }> => {
     return new Promise(async (resolve, reject) => {
       // проверим пришел ли ответ ожидаемого типа
 
@@ -138,14 +138,11 @@ export class SocketMessagingClient<T extends TBaseResultJob> {
       clearTimeout(timeHandle);
       const res = this.recievedServerMessages[ind];
       this.recievedServerMessages.splice(ind, 1);
-      return resolve(res);
+      return resolve(res as unknown as Promise<ServerResponceClient<T2> | { err: string }>);
     });
   };
 
-  async requestServer(
-    typePararm: string,
-    payload?: any,
-  ): Promise<(ServerResponceClient<T> & { timestamp: Date }) | { err: string }> {
+  async requestServer<T1>(typePararm: string, payload?: any): Promise<ServerResponceClient<T1> | { err: string }> {
     if (!this.isConnected()) return { err: 'нет соединения с сервером' };
 
     const curQuery = this.currentQueryIndex++;
