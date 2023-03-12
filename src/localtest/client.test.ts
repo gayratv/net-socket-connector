@@ -1,6 +1,6 @@
 import { delay, SocketMessagingClient } from '../net-socket/index.js';
 import { NLog } from '../logger/logger.implementation.js';
-import type { ServerResponceClient } from '../net-socket/types/net-socket-types.js';
+import type { RecievedServerMessages } from '../net-socket/types/net-socket-types.js';
 
 const s = new SocketMessagingClient('s1', NLog.getInstance());
 await s.connect();
@@ -12,7 +12,7 @@ await delay(2_000);
 const res = await s.requestServer<{ cnt: number }>('cntResponse');
 
 // {type: string, queryIndex: number, resultJob: {cnt: number}, timestamp: Date}
-type A = ServerResponceClient<{ cnt: number }>;
+type A = RecievedServerMessages<{ cnt: number }>;
 
 console.log(res);
 // await s.end();

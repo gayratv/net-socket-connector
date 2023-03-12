@@ -7,4 +7,4 @@ export { delay } from './helpers/common.js';
 export type { ILogger, LoggerLevel } from '../logger/logger.interface.js';
 // необязательная реализация логера
 export { NLog, SimpleLog } from '../logger/logger.implementation.js';
-export type { TBaseResultJob, Formater, ServerResponceClient } from './types/net-socket-types.js';
+export type { TBaseResultJob, Formater, RecievedServerMessages, ErrType } from './types/net-socket-types.js';

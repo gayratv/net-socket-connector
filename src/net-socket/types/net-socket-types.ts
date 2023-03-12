@@ -26,12 +26,16 @@ export type ServerResponce<T extends TBaseResultJob> = {
 };
 
 // для использования клиентом
-export type ServerResponceClient<T> = {
+export type RecievedServerMessages<T> = {
   type: string; // определяет worker
   queryIndex: number; // число ранее полученное от клиента
-  resultJob: T; // результат работы - грубо говоря any
   timestamp: Date;
+  resultJob: T; // результат работы - грубо говоря any первое поле обязательно type:string
 };
+
+export interface ErrType {
+  err: string;
+}
 
 /*
  * Внутри сервер хранит следующую структуру запроса пользователя

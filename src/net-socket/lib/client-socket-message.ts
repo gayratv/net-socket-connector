@@ -1,20 +1,21 @@
 import '../helpers/dotenv-init.js';
 import * as net from 'node:net';
-import type { ErrorNet, MessageToServer } from '../types/net-socket-types.js';
+import type { ErrorNet, ErrType, MessageToServer } from '../types/net-socket-types.js';
 import {
   JobSrvQueuePrintType,
   MESSAGE_SEPARATOR,
   ServerResponce,
-  ServerResponceClient,
+  RecievedServerMessages,
   TBaseResultJob,
 } from '../types/net-socket-types.js';
 import { splitMessages } from '../helpers/socket-helpers.js';
 import { ILogger } from '../../logger/logger.interface.js';
 
-export class SocketMessagingClient<T extends TBaseResultJob> {
+// export class SocketMessagingClient<T extends TBaseResultJob> {
+export class SocketMessagingClient {
   clientSocket: net.Socket;
 
-  recievedServerMessages: Array<ServerResponceClient<T>> = [];
+  recievedServerMessages: Array<RecievedServerMessages<any>> = [];
   private msgBuffer = '';
   currentQueryIndex = 0;
   /*
@@ -32,6 +33,9 @@ export class SocketMessagingClient<T extends TBaseResultJob> {
         },
       );
 
+      /*
+       * клиент получает сообщения от сервера и складывает их в массив
+       */
       this.clientSocket.on('data', (data) => {
         const msgArray = splitMessages(this.msgBuffer + data.toString());
         this.msgBuffer = '';
@@ -58,10 +62,9 @@ export class SocketMessagingClient<T extends TBaseResultJob> {
         //---->>>>>>>>
 
         this.recievedServerMessages = this.recievedServerMessages.concat(objArray);
-        // this.log.info(`  client ${this.name} Received data: `, msgArray);
         this.log.info(`  client ${this.name} Received data: `, msgArray);
 
-        // удалим ответы старше CLIENT_WAIT_FOR_SERVER_ANSWER
+        // удалим запросы старше CLIENT_WAIT_FOR_SERVER_ANSWER
         const timestampMs = timestamp.getTime();
         this.recievedServerMessages = this.recievedServerMessages.filter(
           (val) => Math.abs(val.timestamp.getTime() - timestampMs) < this.clientWaitForServerAnswer,
@@ -116,7 +119,7 @@ export class SocketMessagingClient<T extends TBaseResultJob> {
   waitForServerAnswer = async <T2>(
     typeParam: string,
     queryIndex: number,
-  ): Promise<ServerResponceClient<T2> | { err: string }> => {
+  ): Promise<RecievedServerMessages<T2> | ErrType> => {
     return new Promise(async (resolve, reject) => {
       // проверим пришел ли ответ ожидаемого типа
 
@@ -138,11 +141,11 @@ export class SocketMessagingClient<T extends TBaseResultJob> {
       clearTimeout(timeHandle);
       const res = this.recievedServerMessages[ind];
       this.recievedServerMessages.splice(ind, 1);
-      return resolve(res as unknown as Promise<ServerResponceClient<T2> | { err: string }>);
+      return resolve(res as unknown as Promise<RecievedServerMessages<T2> | ErrType>);
     });
   };
 
-  async requestServer<T1>(typePararm: string, payload?: any): Promise<ServerResponceClient<T1> | { err: string }> {
+  async requestServer<T1>(typePararm: string, payload?: any): Promise<RecievedServerMessages<T1> | ErrType> {
     if (!this.isConnected()) return { err: 'нет соединения с сервером' };
 
     const curQuery = this.currentQueryIndex++;
