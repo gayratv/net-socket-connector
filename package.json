@@ -1,6 +1,6 @@
 {
   "name": "net-socket-connector",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "",
   "type": "module",
   "types": "./dist/net-socket/index.d.ts",

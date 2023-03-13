@@ -157,7 +157,7 @@ export class SocketMessagingClient {
 
     const curQuery = this.currentQueryIndex++;
     const m: MessageToServer = { type: typePararm, queryIndex: curQuery, payload };
-    this.log.debug('send to server ', m, ' payload ');
+    // this.log.debug('send to server ', m, ' payload ');
     await this.sendMsg(JSON.stringify(m));
     // ждать ответа сервера
     return await this.waitForServerAnswer(typePararm, curQuery);
