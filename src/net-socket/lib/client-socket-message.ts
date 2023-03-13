@@ -22,6 +22,13 @@ export class SocketMessagingClient {
    * clientWaitForServerAnswer - максимальное время ожидания клиентом ответа от сервера
    */
   constructor(public name: string, public log: ILogger, public clientWaitForServerAnswer = 20_000) {}
+
+  /*
+   * connect
+   *
+   * извлекает параметры из .env файла:
+   * SOCKET_HOST SOCKET_PORT
+   */
   connect() {
     return new Promise((resolve, reject) => {
       this.clientSocket = net.connect(
@@ -149,8 +156,8 @@ export class SocketMessagingClient {
     if (!this.isConnected()) return { err: 'нет соединения с сервером' };
 
     const curQuery = this.currentQueryIndex++;
-    const m: MessageToServer = { type: typePararm, queryIndex: curQuery };
-    if (payload) m.payload = payload;
+    const m: MessageToServer = { type: typePararm, queryIndex: curQuery, payload };
+    this.log.debug('send to server ', m, ' payload ');
     await this.sendMsg(JSON.stringify(m));
     // ждать ответа сервера
     return await this.waitForServerAnswer(typePararm, curQuery);

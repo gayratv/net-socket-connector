@@ -103,6 +103,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
             internalIndex: this.getInternalIndex(),
           };
           this.clientQueues.push(d);
+          // this.log.debug(d);
           typeMap.set(val.type, true);
         });
 
