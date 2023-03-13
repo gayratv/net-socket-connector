@@ -27,7 +27,7 @@ function socketState(socket: Socket) {
 export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitter {
   //  ключ ${socket.remoteAddress}:${socket.remotePort}
   // по ключю находится объект : socket
-  private clientsSocket: Record<string, Socket> = {};
+  public clientsSocket: Record<string, Socket> = {};
   // по ключю ${socket.remoteAddress}:${socket.remotePort} идентифицируется socket, который выдал запрос
   // на будущее оставлю locked?: boolean; timestamp
   clientQueues: Array<Demand> = [];
