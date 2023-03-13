@@ -258,6 +258,15 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
     this.clientQueues = this.clientQueues.filter((val) => !(val.key === keySocket && !val.inProcessState));
   }
 
+  /*
+   * dropClientRequestByType
+   * discard all client queue by type
+   */
+  dropClientRequestByType(typeP: string) {
+    //   удалить все необработанные сообщения из очереди
+    this.clientQueues = this.clientQueues.filter((val) => !(val.type !== typeP && !val.inProcessState));
+  }
+
   private getInternalIndex(): number {
     if (this.clientQueuesCounter + 1 > MaxInternalIndex) this.clientQueuesCounter = 0;
     return this.clientQueuesCounter++;
