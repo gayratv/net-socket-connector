@@ -108,3 +108,5 @@ SOCKET_HOST=localhost
 Наиболее удобный способ запросить сервер и получить ответ - метод ```const res = await s.requestServer('cntResponse');```
 
 Послать запрос к серверу также можно с помощью метода ```await s.sendMsg(JSON.stringify({ type: 'getip', queryIndex: 1, payload: 0 }));```
+
+r
