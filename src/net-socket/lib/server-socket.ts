@@ -27,6 +27,7 @@ function socketState(socket: Socket) {
 export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitter {
   //  ключ ${socket.remoteAddress}:${socket.remotePort}
   // по ключю находится объект : socket
+  // TODO: заменить объект clientsSocket на map потому что map работает быстрее
   public clientsSocket: Record<string, Socket> = {};
   // по ключю ${socket.remoteAddress}:${socket.remotePort} идентифицируется socket, который выдал запрос
   // на будущее оставлю locked?: boolean; timestamp
@@ -37,7 +38,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
   // внутренний счетчик сервера для учета сообщений клиента - сообщения будут искаться по этому номеру
   private server: Server;
 
-  private msgBuffer = ''; // остаток буфера
+  private msgBuffer = ''; // остаток буфера при приеме потоковых сообщений
   constructor(public name: string, public log: ILogger) {
     super();
   }

@@ -97,7 +97,12 @@ export class WorkerForServer<TresultJob extends TBaseResultJob> {
         this.serverSocket.emit(workerJobDone, msgToServer);
       } else {
         workerForProcess.demandQueIsProcessing = true; // очередь type занята работой
-        const result = await workerForProcess.runner(demand);
+        let result;
+        try {
+          result = await workerForProcess.runner(demand);
+        } catch (err) {
+          result = null; // jobber не смог обработать запрос
+        }
         const msgToServer: EventJobDoneArgs<TresultJob> = {
           demand,
           resultJob: result,

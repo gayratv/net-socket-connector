@@ -170,7 +170,7 @@ export class SocketMessagingClient {
       clearTimeout(timeHandle);
       const res = this.recievedServerMessages[ind];
       this.recievedServerMessages.splice(ind, 1);
-      return resolve(res as unknown as RecievedServerMessages<T2>);
+      resolve(res as unknown as RecievedServerMessages<T2>);
     });
   };
 

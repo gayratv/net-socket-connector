@@ -1,10 +1,10 @@
-import { SocketMessagingClient, MessageToServer, delay } from '../net-socket/index.js';
+import { SocketMessagingClient } from '../net-socket/index.js';
 import { NLog } from '../logger/logger.implementation.js';
 
 const s = new SocketMessagingClient('s1', NLog.getInstance());
 await s.connect();
 
-console.log(s.log.debug(s.log.sw('sendMsg ***************', 'green')));
+s.log.debug(s.log.sw('sendMsg ***************', 'green'));
 // здесь принудительно указывается queryIndex 1 - который будет в последущем кофнфилктовать с вызовом req с тем же самым queryIndex
 await s.sendMsg(JSON.stringify({ type: 'cntResponse', queryIndex: 1 }));
 
