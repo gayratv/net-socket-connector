@@ -115,10 +115,25 @@ export class SocketMessagingClient {
     return this.clientSocket.writable;
   }
 
+  private increaseMaxCountListeners() {
+    const maxListeners = this.clientSocket.getMaxListeners();
+    this.clientSocket.setMaxListeners(maxListeners + 1);
+  }
+  private decreaseMaxCountListeners() {
+    const maxListeners = this.clientSocket.getMaxListeners();
+    if (maxListeners > 10) this.clientSocket.setMaxListeners(maxListeners - 1);
+  }
+
   // получен какой то ответ от сервера
-  serverAnswered() {
+  private serverAnswered() {
+    // поскольку мы добавляем нового слушателя - то надо увеличить количество слушателей
+    this.increaseMaxCountListeners();
+
     return new Promise((resolve) => {
-      this.clientSocket.once('data', resolve);
+      this.clientSocket.once('data', (data: Buffer) => {
+        this.decreaseMaxCountListeners();
+        resolve(true);
+      });
     });
   }
 
@@ -129,26 +144,33 @@ export class SocketMessagingClient {
   ): Promise<RecievedServerMessages<T2> | ErrType> => {
     return new Promise(async (resolve, reject) => {
       // проверим пришел ли ответ ожидаемого типа
+      let emergencyExit = false;
 
       // сразу запустим таймер, который прервет любое ожидание
       const timeHandle = setTimeout(() => {
-        reject({ err: 'не дождались ответа сервера' });
+        // this.decreaseMaxCountListeners(); - сбросится сам при следующем приходе данных
+        emergencyExit = true;
+        reject({ err: 'waitForServerAnswer не дождались ответа сервера' });
       }, this.clientWaitForServerAnswer);
 
       // поскольку мы только что передали запрос - то ответа от сервера в очереди быть еще не может и надо ждать данных
       await this.serverAnswered();
+      if (emergencyExit) return;
 
       let ind = -1;
       while (true) {
         ind = this.recievedServerMessages.findIndex((elm) => elm.type === typeParam && queryIndex === elm.queryIndex);
-        if (ind === -1) await this.serverAnswered();
-        else break;
+        if (ind === -1) {
+          // пришел ответ от сервера с другим типом или номером
+          await this.serverAnswered();
+          if (emergencyExit) return;
+        } else break;
       }
       // ответ от сервера получен до истечения времени ожидания
       clearTimeout(timeHandle);
       const res = this.recievedServerMessages[ind];
       this.recievedServerMessages.splice(ind, 1);
-      return resolve(res as unknown as Promise<RecievedServerMessages<T2> | ErrType>);
+      return resolve(res as unknown as RecievedServerMessages<T2>);
     });
   };
 
