@@ -8,6 +8,7 @@
   "rules": {
     "prettier/prettier": "error",
     "@typescript-eslint/ban-ts-comment": 0,
-    "@typescript-eslint/no-empty-function": 0
+    "@typescript-eslint/no-empty-function": 0,
+    "@typescript-eslint/no-explicit-any": 0
   }
 }

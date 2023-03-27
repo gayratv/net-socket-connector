@@ -1,13 +1,7 @@
 import '../helpers/dotenv-init.js';
 import * as net from 'node:net';
 import type { ErrorNet, ErrType, MessageToServer } from '../types/net-socket-types.js';
-import {
-  JobSrvQueuePrintType,
-  MESSAGE_SEPARATOR,
-  ServerResponce,
-  RecievedServerMessages,
-  TBaseResultJob,
-} from '../types/net-socket-types.js';
+import { JobSrvQueuePrintType, MESSAGE_SEPARATOR, RecievedServerMessages } from '../types/net-socket-types.js';
 import { splitMessages } from '../helpers/socket-helpers.js';
 import { ILogger } from '../../logger/logger.interface.js';
 
@@ -98,10 +92,16 @@ export class SocketMessagingClient {
     // this.log.info(this.client);
     return new Promise((resolve, reject) => {
       this.clientSocket.write(s + MESSAGE_SEPARATOR, 'utf8', (err?: Error) => {
-        if (err) reject(err);
-        else resolve(true);
+        // The optional callback parameter will be executed when the data is finally written out
+        if (err) {
+          (err as unknown as any).err = 'sendMsg внутренняя ошибка';
+          this.log.error(err);
+          reject(err);
+        } else resolve(true);
       });
     });
+    // ошибку решил не купировать потому что непонятно что с ней делать
+    // }).catch((err) => err);
   }
 
   end() {
@@ -124,13 +124,13 @@ export class SocketMessagingClient {
     if (maxListeners > 10) this.clientSocket.setMaxListeners(maxListeners - 1);
   }
 
-  // получен какой то ответ от сервера
+  // получен какой-то ответ от сервера
   private serverAnswered() {
     // поскольку мы добавляем нового слушателя - то надо увеличить количество слушателей
     this.increaseMaxCountListeners();
 
     return new Promise((resolve) => {
-      this.clientSocket.once('data', (data: Buffer) => {
+      this.clientSocket.once('data', () => {
         this.decreaseMaxCountListeners();
         resolve(true);
       });
@@ -141,21 +141,22 @@ export class SocketMessagingClient {
   waitForServerAnswer = async <T2>(
     typeParam: string,
     queryIndex: number,
-  ): Promise<RecievedServerMessages<T2> | ErrType> => {
-    return new Promise(async (resolve, reject) => {
+  ): Promise<RecievedServerMessages<T2> | ErrType | void> => {
+    const errMsg = { err: 'waitForServerAnswer не дождались ответа сервера' };
+    const promiseResult: Promise<RecievedServerMessages<T2>> = new Promise(async (resolve, reject) => {
       // проверим пришел ли ответ ожидаемого типа
-      let emergencyExit = false;
 
       // сразу запустим таймер, который прервет любое ожидание
       const timeHandle = setTimeout(() => {
         // this.decreaseMaxCountListeners(); - сбросится сам при следующем приходе данных
-        emergencyExit = true;
-        reject({ err: 'waitForServerAnswer не дождались ответа сервера' });
+        this.log.error('waitForServerAnswer timeout end');
+        reject(errMsg);
+        // }, 100);
       }, this.clientWaitForServerAnswer);
-
+      // console.log('--2');
       // поскольку мы только что передали запрос - то ответа от сервера в очереди быть еще не может и надо ждать данных
       await this.serverAnswered();
-      if (emergencyExit) return;
+      // console.log('--3');
 
       let ind = -1;
       while (true) {
@@ -163,7 +164,7 @@ export class SocketMessagingClient {
         if (ind === -1) {
           // пришел ответ от сервера с другим типом или номером
           await this.serverAnswered();
-          if (emergencyExit) return;
+          // console.log('--5');
         } else break;
       }
       // ответ от сервера получен до истечения времени ожидания
@@ -171,6 +172,9 @@ export class SocketMessagingClient {
       const res = this.recievedServerMessages[ind];
       this.recievedServerMessages.splice(ind, 1);
       resolve(res as unknown as RecievedServerMessages<T2>);
+    });
+    return promiseResult.catch(() => {
+      return errMsg;
     });
   };
 
@@ -182,7 +186,7 @@ export class SocketMessagingClient {
     // this.log.debug('send to server ', m, ' payload ');
     await this.sendMsg(JSON.stringify(m));
     // ждать ответа сервера
-    return await this.waitForServerAnswer(typePararm, curQuery);
+    return (await this.waitForServerAnswer(typePararm, curQuery)) as unknown as RecievedServerMessages<T1> | ErrType;
   }
 
   async printServerQueue() {
