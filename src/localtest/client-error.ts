@@ -1,4 +1,4 @@
-import { SocketMessagingClient, MessageToServer, delay } from '../net-socket/index.js';
+import { SocketMessagingClient, MessageToServer } from '../net-socket/index.js';
 import { NLog } from '../logger/logger.implementation.js';
 
 const s = new SocketMessagingClient('s1', NLog.getInstance());
