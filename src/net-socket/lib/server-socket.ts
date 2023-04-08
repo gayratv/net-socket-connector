@@ -17,7 +17,7 @@ import {
 } from '../types/net-socket-types.js';
 import { AddressInfo, Socket, Server, createServer } from 'node:net';
 import { splitMessages } from '../helpers/socket-helpers.js';
-import { ILogger } from '../../logger/logger.interface.js';
+import { ILogger } from 'tslog-fork';
 import { validateMsgToServer } from '../helpers/validate.js';
 import { defaultFormater } from './worker-for-server.js';
 function socketState(socket: Socket) {

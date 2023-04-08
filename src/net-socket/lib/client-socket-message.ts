@@ -3,7 +3,7 @@ import * as net from 'node:net';
 import type { ErrorNet, ErrType, MessageToServer } from '../types/net-socket-types.js';
 import { JobSrvQueuePrintType, MESSAGE_SEPARATOR, RecievedServerMessages } from '../types/net-socket-types.js';
 import { splitMessages } from '../helpers/socket-helpers.js';
-import { ILogger } from '../../logger/logger.interface.js';
+import { ILogger } from 'tslog-fork';
 
 // export class SocketMessagingClient<T extends TBaseResultJob> {
 export class SocketMessagingClient {
