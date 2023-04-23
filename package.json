@@ -1,6 +1,6 @@
 {
   "name": "net-socket-connector",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "",
   "type": "module",
   "types": "./dist/net-socket/index.d.ts",
@@ -13,7 +13,7 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "build": "rimraf dist && rimraf tsconfig.tsbuildinfo && node ./scripts/esbuild.js && tsc && rimraf dist/localtest dist/net-socket/helpers dist/net-socket/lib dist/net-socket/types",
+    "build": "rimraf dist && rimraf tsconfig.tsbuildinfo && node ./scripts/esbuild.js && tsc && rimraf dist/localtest dist/net-socket/helpers ",
     "type-check": "tsc -noEmit",
     "pub": "npm publish --public",
     "server": "ts-node -r tsconfig-paths/register ./src/localtest/server.test.ts",
