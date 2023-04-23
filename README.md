@@ -94,11 +94,11 @@ w.registerNewWorker(testJobWorker);
 const s = new SocketMessagingClient('s1');
 await s.connect();
 ```
-Информация для соединения с сервером берется из файла .env
+Информация для соединения с сервером задается в конструкторе
 
 ```dotenv
-SOCKET_PORT=41969
-SOCKET_HOST=localhost
+PORT=41969
+HOST=localhost
 ```
 
 вместо localhost необходимо указать IP сервера на котором работает server

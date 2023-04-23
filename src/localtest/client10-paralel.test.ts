@@ -1,6 +1,6 @@
-import { SocketMessagingClient, MessageToServer, delay } from '../net-socket/index.js';
-import { NLog } from '../logger/logger.implementation.js';
+import { SocketMessagingClient, MessageToServer } from '../net-socket/index.js';
 import { EventEmitter } from 'events';
+import { NLog } from 'tslog-fork';
 
 const s = new SocketMessagingClient('s1', NLog.getInstance());
 await s.connect();

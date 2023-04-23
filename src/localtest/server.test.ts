@@ -1,10 +1,11 @@
 // для тестирования пакета
-import { delay, Executor, JobWorker, GetNextClientJob, ServerSocket, WorkerForServer } from '../net-socket/index.js';
-import { NLog } from '../logger/logger.implementation.js';
+import { Executor, JobWorker, GetNextClientJob, ServerSocket, WorkerForServer } from '../net-socket/index.js';
 import { createNewJober } from '../net-socket/lib/worker-for-server.js';
+import { NLog } from 'tslog-fork';
+import { delay } from '../net-socket/helpers/common.js';
 
 const serverTest = new ServerSocket('SRV1', NLog.getInstance());
-serverTest.createServer();
+serverTest.createServer(41969);
 const w = new WorkerForServer(serverTest, NLog.getInstance());
 
 let counter1 = 0;

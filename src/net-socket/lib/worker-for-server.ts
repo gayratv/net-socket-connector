@@ -8,8 +8,8 @@ import {
   serverJobRecieved,
   workerJobDone,
 } from '../types/net-socket-types.js';
-import { delay, getPort, objectToString } from '../helpers/common.js';
 import { ILogger } from 'tslog-fork';
+import { delay, getPort, objectToString } from '../helpers/common.js';
 
 export const defaultFormater: Formater<any> = (args: EventJobDoneArgs<any>) => {
   return `${workerJobDone} queryIndex ${args.demand.queItem.queryIndex}  cliIp : ${getPort(

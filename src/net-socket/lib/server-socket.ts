@@ -1,5 +1,3 @@
-// import * as net from 'node:net';
-import '../helpers/dotenv-init.js';
 import { EventEmitter } from 'events';
 import {
   Demand,
@@ -43,7 +41,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
     super();
   }
 
-  async createServer() {
+  async createServer(socketPortParam: number) {
     this.server = createServer((socket) => {
       // this.log.silly('Client connected ', socketState(socket));
 
@@ -148,7 +146,7 @@ export class ServerSocket<TresultJob extends TBaseResultJob> extends EventEmitte
       this.log.error(err);
     });
 
-    this.server.listen(parseInt(process.env.SOCKET_PORT, 10), () => {
+    this.server.listen(socketPortParam, () => {
       this.log.silly(`${this.name} opened server on port ${(this.server.address() as AddressInfo).port}`);
       this.log.silly(this.server.address());
     });

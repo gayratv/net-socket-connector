@@ -1,8 +1,8 @@
-import { delay, SocketMessagingClient } from '../net-socket/index.js';
-import { NLog } from '../logger/logger.implementation.js';
+import { SocketMessagingClient } from '../net-socket/index.js';
 import type { RecievedServerMessages } from '../net-socket/types/net-socket-types.js';
+import { NLog } from 'tslog-fork';
 
-const s = new SocketMessagingClient('s1', NLog.getInstance());
+const s = new SocketMessagingClient('s1', NLog.getInstance(), 41969, 'localhost');
 await s.connect();
 
 //  нет обработчика

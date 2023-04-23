@@ -1,4 +1,3 @@
-import '../helpers/dotenv-init.js';
 import * as net from 'node:net';
 import type { ErrorNet, ErrType, MessageToServer } from '../types/net-socket-types.js';
 import { JobSrvQueuePrintType, MESSAGE_SEPARATOR, RecievedServerMessages } from '../types/net-socket-types.js';
@@ -15,24 +14,26 @@ export class SocketMessagingClient {
   /*
    * clientWaitForServerAnswer - максимальное время ожидания клиентом ответа от сервера
    */
-  constructor(public name: string, public log: ILogger, public clientWaitForServerAnswer = 20_000) {}
+  constructor(
+    public name: string,
+    public log: ILogger,
+    public socketPortParam: number,
+    public socketHostParam: string,
+    public clientWaitForServerAnswer = 20_000,
+  ) {}
 
   /*
    * connect
-   *
-   * извлекает параметры из .env файла:
-   * SOCKET_HOST SOCKET_PORT
+   *  socketHostParam
+   *  socketPortParam
    */
   connect() {
     return new Promise((resolve, reject) => {
-      this.clientSocket = net.connect(
-        { port: parseInt(process.env.SOCKET_PORT, 10), host: process.env.SOCKET_HOST },
-        () => {
-          // listener for the 'connect' event once.
-          this.log.info(`${this.name} Connected to server!`);
-          resolve(true);
-        },
-      );
+      this.clientSocket = net.connect({ port: this.socketPortParam, host: this.socketHostParam }, () => {
+        // listener for the 'connect' event once.
+        this.log.info(`${this.name} Connected to server!`);
+        resolve(true);
+      });
 
       /*
        * клиент получает сообщения от сервера и складывает их в массив
