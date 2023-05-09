@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": "./src",
+
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+
+//    Option 'outFile' cannot be specified with option 'isolatedModules'.
+//    "isolatedModules": true, // для esbuild
+    "esModuleInterop": true , // Emit additional JavaScript to ease support for importing CommonJS modules. This enables `allowSyntheticDefaultImports` for type compatibility.
+    "typeRoots": ["./node_modules/@types", "./types","types"],
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outFile": "./_declaration/declaration.d.ts",
+//    "declarationDir": "./dist",
+//    "outDir": "./build",
+    "baseUrl": "src",
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts"
+  ],
+
+  "ts-node": {
+    "esm": true,
+    "transpileOnly": true,
+    "files": true,
+    "experimentalResolver": true,
+    "experimentalSpecifierResolution": "node"
+
+  }
+}

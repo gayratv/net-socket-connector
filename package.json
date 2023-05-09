@@ -14,6 +14,7 @@
   },
   "scripts": {
     "build": "rimraf dist && rimraf tsconfig.tsbuildinfo && node ./scripts/esbuild.js && tsc && rimraf dist/localtest dist/net-socket/helpers ",
+    "build-declaration": "tsc -p ./tsconfig.declaration.json",
     "type-check": "tsc -noEmit",
     "pub": "npm publish --public",
     "server": "ts-node -r tsconfig-paths/register ./src/localtest/server.test.ts",
